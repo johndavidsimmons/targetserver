@@ -12,7 +12,7 @@ block content
                     input(type="radio" name=question.question id=answer)
                     label(for=answer) #{answer}
         p
-            button(id="submit") submit
+            button(id="submit" disabled="true") submit
     script.
         if ("#{experienceName}" != "Default (CTRL)") {
             document.getElementById('3').style.color = "red"
@@ -27,6 +27,9 @@ block content
 
         document.querySelectorAll("input").forEach(el => {
             el.addEventListener("click", () => {
+                if (document.querySelectorAll("input[type='radio']:checked").length == 4) {
+                    document.getElementById("submit").disabled = false
+                }
                 let payload = {
                     "event": "FORM_SELECTION",
                     "metadata": {
