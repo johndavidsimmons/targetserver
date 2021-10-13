@@ -1,0 +1,3 @@
+window.targetGlobalSettings = {
+    overrideMboxEdgeServer: true
+  };

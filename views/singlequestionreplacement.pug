@@ -1,0 +1,50 @@
+extends layout.pug
+
+block content
+    h1 single question replacement
+    p this page will call target for a test question, if no test content is returned it will load default content
+    each question in questions
+        div(id=question.id).question
+            p(style="font-weight:bold")=question.question
+            each answer in question.answers
+                input(type="radio" name=question.question id=answer)
+                label(for=answer) #{answer}
+    p
+        button(id="submit") submit
+    script.
+        if ("#{experienceName}" != "Default (CTRL)") {
+            document.getElementById('3').style.color = "red"
+        }
+
+        let DLDebug = (payload) => {
+            let li = document.createElement("li");
+            li.innerText = JSON.stringify(payload)
+            document.querySelector("#datalayer").appendChild(li)
+            document.querySelector("#datalayerlength").innerText = "(" + adobeDataLayer.length + ")"
+        }
+
+        document.querySelectorAll("input").forEach(el => {
+            el.addEventListener("click", () => {
+                let payload = {
+                    "event": "FORM_SELECTION",
+                    "metadata": {
+                        "form": {}
+                    }
+                }
+                payload.metadata.form[el.name.split(" ").join("")] = el.id;
+                adobeDataLayer.push(payload)
+                DLDebug(payload)
+                document.querySelector("#datalayerstate").innerText = JSON.stringify(adobeDataLayer.getState().metadata.form, null, 4)
+                
+            })
+        })
+        document.getElementById("submit").addEventListener("click", () => {
+            let payload = {
+                    "event": "FORM_SUCCESS"
+                }
+            adobeDataLayer.push(payload)
+            DLDebug(payload)
+        })
+    script. 
+        //- var v = Visitor.getInstance("5D60123F5245B13E0A490D45@AdobeOrg", {serverState: !{visitorState}});
+        //- console.log(v)

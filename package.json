@@ -1,0 +1,21 @@
+{
+  "name": "targetserver",
+  "version": "1.0.0",
+  "description": "An Adobe Target demo environment",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ."
+  },
+  "author": "John SImmons",
+  "license": "ISC",
+  "dependencies": {
+    "@adobe/target-nodejs-sdk": "^2.2.1",
+    "cookie-parser": "^1.4.5",
+    "express": "^4.17.1",
+    "pug": "^3.0.2"
+  },
+  "engines": {
+    "node": "15.x"
+  }
+}

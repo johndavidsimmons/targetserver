@@ -1,0 +1,13 @@
+extends layout.pug
+
+block content
+    h1 hello #{title}
+    h2 #{content}
+    p visitor State
+    p 
+        strong #{visitorState} 
+    ul
+        li
+            a(href="/singlequestionreplacement") single question replacement    
+    script. 
+        Visitor.getInstance("5D60123F5245B13E0A490D45@AdobeOrg", {serverState: !{visitorState}});
