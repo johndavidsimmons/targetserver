@@ -12,6 +12,7 @@ block content
                 each answer in question.answers
                     input(type="radio" name=question.question id=answer)
                     label(for=answer) #{answer}
+        p the button will disappear once you submit
         p
             button(id="submit" disabled="true") submit
     script.
@@ -54,6 +55,7 @@ block content
                 payload.metadata.form = adobeDataLayer.getState().metadata.form
             adobeDataLayer.push(payload)
             DLDebug(payload)
+            document.getElementById("submit").style.display = "none"
         })
     script. 
         //- var v = Visitor.getInstance("5D60123F5245B13E0A490D45@AdobeOrg", {serverState: !{visitorState}});
