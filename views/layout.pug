@@ -18,31 +18,36 @@ html
             type="text/javascript"
             )
     body
-        div(style="float:right")
-            h2 Debug
-            table(border="1")
-                tr
-                    td Visitor Cookie Name 
-                    td(id="visitorCookieName") 
-                tr
-                    td ECID 
-                    td(id="ecid")
-                tr
-                    td Supplemental Data ID 
-                    td(id="supdataid")
-                tr
-                    td Experience Name
-                    td  #{experienceName}
-            h2 Data Layer
-            p 
-                strong Form Submission State
-            p(id="datalayerstate")
-            p 
-                strong Events
-                    span(id="datalayerlength") &nbsp; (0)
-            ul(id="datalayer")
+        
         block content
-    footer  
+    footer 
+        hr
+        div(style="float:left")
+                h2 Debug
+                table(border="1")
+                    tr
+                        td Visitor Cookie Name 
+                        td(id="visitorCookieName") 
+                    tr
+                        td ECID 
+                        td(id="ecid")
+                    tr
+                        td Supplemental Data ID 
+                        td(id="supdataid")
+                    tr
+                        td Experience Name
+                        td  #{experienceName}
+                    tr
+                        td Activity Name
+                        td  #{activityName}
+                h2 Data Layer
+                p 
+                    strong Form State
+                p(id="datalayerstate")
+                p 
+                    strong Events
+                        span(id="datalayerlength") &nbsp; (0)
+                ul(id="datalayer") 
         script. 
             Visitor.getInstance("5D60123F5245B13E0A490D45@AdobeOrg", {serverState: !{visitorState}})
             var visitor = Visitor.getInstance("5D60123F5245B13E0A490D45@AdobeOrg", {serverState: !{visitorState}})

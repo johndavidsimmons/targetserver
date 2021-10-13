@@ -136,6 +136,7 @@ const targetClient = TargetClient.create(CONFIG);
     const response = await targetClient.getOffers({ request, visitorCookie, targetCookie, targetLocationHintCookie });
     let {visitorState, responseTokens} = response
     let experienceName = responseTokens[0]['experience.name'];
+    let activityName = responseTokens[0]['activity.name'];
 
     if (experienceName.toLowerCase().includes('variant')) {
       questions.push(response.response.execute.mboxes.find(el => el.index == 0).options[0].content)
@@ -165,6 +166,7 @@ const targetClient = TargetClient.create(CONFIG);
      responseOutput: JSON.stringify(response, null, 4),
      visitorState: JSON.stringify(visitorState),
      experienceName: experienceName,
+     activityName:activityName,
      debug:false
    })
  })

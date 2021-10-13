@@ -3,14 +3,16 @@ extends layout.pug
 block content
     h1 single question replacement
     p this page will call target for a test question, if no test content is returned it will load default content
-    each question in questions
-        div(id=question.id).question
-            p(style="font-weight:bold")=question.question
-            each answer in question.answers
-                input(type="radio" name=question.question id=answer)
-                label(for=answer) #{answer}
-    p
-        button(id="submit") submit
+    p(style="color:red") test questions will be highlighted red
+    div(style="border:1px solid blue; width: 50%")
+        each question in questions
+            div(id=question.id).question
+                p(style="font-weight:bold")=question.question
+                each answer in question.answers
+                    input(type="radio" name=question.question id=answer)
+                    label(for=answer) #{answer}
+        p
+            button(id="submit") submit
     script.
         if ("#{experienceName}" != "Default (CTRL)") {
             document.getElementById('3').style.color = "red"
@@ -40,8 +42,12 @@ block content
         })
         document.getElementById("submit").addEventListener("click", () => {
             let payload = {
-                    "event": "FORM_SUCCESS"
+                    "event": "FORM_SUCCESS",
+                    "metadata": {
+                        "form":{}
+                    }
                 }
+                payload.metadata.form = adobeDataLayer.getState().metadata.form
             adobeDataLayer.push(payload)
             DLDebug(payload)
         })
