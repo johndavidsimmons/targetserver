@@ -10,21 +10,24 @@
  * governing permissions and limitations under the License.
  ****************************************************************************************/
 
- const fs = require("fs");
- const express = require("express");
- const cookieParser = require("cookie-parser");
- const TargetClient = require("@adobe/target-nodejs-sdk");
- const pug = require('pug');
+const fs = require("fs");
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const TargetClient = require("@adobe/target-nodejs-sdk");
+const pug = require('pug');
+const dotenv = require('dotenv')
+const path = require('path');
 
- const path = require('path');
-const exp = require("constants");
- const CONFIG = {
-   client: "quickenloans",
-   organizationId: "5D60123F5245B13E0A490D45@AdobeOrg",
-   timeout: 10000,
-   logger: console
- };
- const targetClient = TargetClient.create(CONFIG);
+// load .env file
+dotenv.config();
+
+const CONFIG = {
+  client: process.env.client,
+  organizationId: process.env.organizationId,
+  timeout: 3000,
+  // logger: console // logs target responses to console
+};
+const targetClient = TargetClient.create(CONFIG);
  
  const app = express();
  app.use(cookieParser());
@@ -165,8 +168,8 @@ const exp = require("constants");
      debug:false
    })
  })
- app.listen(3000, function () {
-   console.log("Listening on port 3000 and watching!");
+ app.listen(process.env.PORT, function () {
+   console.log("Listening on port " + process.env.PORT.toString() + " and watching!");
  });
 
 
