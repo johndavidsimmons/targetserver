@@ -22,6 +22,8 @@ html
         block content
     footer 
         hr
+        p
+            a(href="https://www.rocketmortgage.com" id="crossdomain" target="_blank") Cross Domain Tracking to Rocket Mortgage, ECIDs should match
         div(style="float:left")
                 h2 Debug
                 table(border="1")
@@ -54,4 +56,8 @@ html
             document.getElementById("visitorCookieName").innerText = visitor.cookieName
             document.getElementById("ecid").innerText = visitor.getMarketingCloudVisitorID()
             document.getElementById("supdataid").innerText = visitor.getSupplementalDataID()
+
+            let originalURL = document.querySelector("#crossdomain").href
+            let crossURL = visitor.appendVisitorIDsTo(originalURL); 
+            document.querySelector("#crossdomain").href = crossURL
 
