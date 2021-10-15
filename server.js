@@ -25,7 +25,7 @@ const CONFIG = {
   client: process.env.client,
   organizationId: process.env.organizationId,
   timeout: 3000,
-  // logger: console // logs target responses to console
+  logger: console // logs target responses to console
 };
 const targetClient = TargetClient.create(CONFIG);
  
@@ -53,16 +53,18 @@ const targetClient = TargetClient.create(CONFIG);
  }
   
  app.get("/", async (req,res) => {
-  const visitorCookie = req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
-  const targetCookie = req.cookies[TargetClient.TargetCookieName];
-  const targetLocationHintCookie = req.cookies[TargetClient.TargetLocationHintCookieName];
+
+  if (req.query.referrer) {
+    const visitorCookie = req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
+    const targetCookie = req.cookies[TargetClient.TargetCookieName];
+    const targetLocationHintCookie = req.cookies[TargetClient.TargetLocationHintCookieName];
   const request = {
     execute: {
       mboxes: [{
         address: getAddress(req),
-        name: "lander-ssr-1",
+        name: "landerImage",
         profileParameters: {
-          country: "usa"
+          country: 'usa'
         }
       }
       ]
@@ -70,13 +72,11 @@ const targetClient = TargetClient.create(CONFIG);
 
     try {
       const response = await targetClient.getOffers({ request, visitorCookie, targetCookie, targetLocationHintCookie });
-      let {visitorState} = response
-      let content;
-      try {
-         content = response.response.execute.mboxes.find(el => el.index == 0).options[0].content
-      } catch (e) {
-         content = e
-      }
+      let {visitorState, responseTokens} = response
+      let experienceName = responseTokens[0]['experience.name'];
+      let activityName = responseTokens[0]['activity.name'];
+      let content = response.response.execute.mboxes[0].options[0].content
+      let src = content.slice(10,-3)
 
       // save the cookies to stay in the same experience!
       res.set(getResponseHeaders());
@@ -87,12 +87,29 @@ const targetClient = TargetClient.create(CONFIG);
         title: "john",
         response: JSON.stringify(response),
         visitorState: JSON.stringify(visitorState),
-        content: content
+        content: content,
+        experienceName: experienceName,
+        activityName:activityName,
+        src:src
     })
     } catch (error) {
       console.error("Target:", error);
       
     }
+  } else {
+    res.render('index', {
+      title: "john",
+      src: "rocketlogo.png"
+        // response: JSON.stringify(response),
+        // visitorState: JSON.stringify(visitorState),
+        // content: content,
+        // experienceName: experienceName,
+        // activityName:activityName,
+  })
+  }
+
+
+  
  })
 
  app.get("/singlequestionreplacement", async (req,res) => {
@@ -170,9 +187,106 @@ const targetClient = TargetClient.create(CONFIG);
      debug:false
    })
  })
+
+ app.get("/removequestion", async(req,res) => {
+  const visitorCookie = req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
+  const targetCookie = req.cookies[TargetClient.TargetCookieName];
+  const targetLocationHintCookie = req.cookies[TargetClient.TargetLocationHintCookieName];
+  const request = {
+    execute: {
+      mboxes: [{
+        address: getAddress(req),
+        name: "removeQuestion",
+        profileParameters: {
+          country: "usa"
+        }
+      }
+      ]
+    }}
+    
+
+    const response = await targetClient.getOffers({ request, visitorCookie, targetCookie, targetLocationHintCookie });
+    let {visitorState, responseTokens} = response
+    let experienceName = responseTokens[0]['experience.name'];
+    let activityName = responseTokens[0]['activity.name'];
+    
+
+    const questions = response.response.execute.mboxes[0].options[0].content.questions
+  // add an id to these
+  questions.forEach((q, idx) => {
+    Object.assign(q, {
+      id: idx+1
+    })
+  });
+
+  // save the cookies to stay in the same experience!
+  res.set(getResponseHeaders());
+  saveCookie(res, response.targetCookie);
+  saveCookie(res, response.targetLocationHintCookie);
+
+   res.render("removequestion", {
+     questions: response.response.execute.mboxes[0].options[0].content.questions,
+     visitorState: JSON.stringify(visitorState),
+     experienceName: experienceName,
+     activityName:activityName,
+     debug:false
+   })
+ })
+
+ app.get("/addquestion", async(req,res) => {
+  const visitorCookie = req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
+  const targetCookie = req.cookies[TargetClient.TargetCookieName];
+  const targetLocationHintCookie = req.cookies[TargetClient.TargetLocationHintCookieName];
+  const request = {
+    execute: {
+      mboxes: [{
+        address: getAddress(req),
+        name: "addQuestion",
+        profileParameters: {
+          country: "usa"
+        }
+      }
+      ]
+    }}
+    
+
+    const response = await targetClient.getOffers({ request, visitorCookie, targetCookie, targetLocationHintCookie });
+    console.log(response)
+    let {visitorState, responseTokens} = response
+    let experienceName = responseTokens[0]['experience.name'];
+    let activityName = responseTokens[0]['activity.name'];
+    
+
+    const questions = response.response.execute.mboxes[0].options[0].content.questions
+  // add an id to these
+  questions.forEach((q, idx) => {
+    Object.assign(q, {
+      id: idx+1
+    })
+  });
+
+  // save the cookies to stay in the same experience!
+  res.set(getResponseHeaders());
+  saveCookie(res, response.targetCookie);
+  saveCookie(res, response.targetLocationHintCookie);
+
+   res.render("addquestion", {
+     questions: questions,
+     visitorState: JSON.stringify(visitorState),
+     experienceName: experienceName,
+     activityName:activityName,
+     debug:false
+   })
+ })
  app.listen(process.env.PORT, function () {
    console.log("Listening on port " + process.env.PORT.toString() + " and watching!");
  });
 
 
- 
+ // change/swap question
+  // - pure ab?
+ // remove question
+    // -xt controls the hide show/ a/b to redirect
+ // add question
+    // -xt controls the addition show/ a/b to redirect
+// image

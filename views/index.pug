@@ -1,13 +1,22 @@
 extends layout.pug
 
 block content
-    h1 hello #{title}
-    h2 #{content}
+    h1 Target Demonstration Site
+    h3 add a referrer query parameter to change the image
+    ul
+        li nerdwallet
+        li creditkarma
+        li realtor
+    img(src=src)
     p visitor State
     p 
         strong #{visitorState} 
     ul
         li
-            a(href="/singlequestionreplacement") single question replacement    
+            a(href="/singlequestionreplacement") single question testing/replacement
+        li
+            a(href="/removequestion?rm=none") remove questions
+        li
+            a(href="/addquestion?add=none") add questions
     script. 
         Visitor.getInstance("5D60123F5245B13E0A490D45@AdobeOrg", {serverState: !{visitorState}});

@@ -1,0 +1,34 @@
+{
+    "questions": [
+        {
+            "question": "What is your favorite Color",
+            "answers": [
+              "red", "green", "blue", "orange"
+            ]
+          },
+          {
+            "question": "FOC do you work for?",
+            "answers": [
+              "rocket homes", "rocket loans", "rocket mortgage", "rocket auto"
+            ]
+          },
+          {
+            "question": "What garage do you park in?",
+            "answers": [
+              "ZLOT", "OCM", "Greektown", "I walk to work"
+            ]
+          },
+          {
+            "question": "Do you have a real estate agent?",
+            "answers": [
+              "Yes", "No", "I don't know"
+            ]
+          },
+          {
+            "question": "Are you a first time homebuyer?",
+            "answers": [
+              "Yes", "No", "I don't know"
+            ]
+          }
+    ]
+}

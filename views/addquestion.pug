@@ -1,0 +1,60 @@
+extends layout.pug
+
+block content
+    h1 Add question by query parameter
+    p this page will add questions from Target with query parameters
+    div(style="border:1px solid blue; width: 50%")
+        each question in questions
+            div(id=question.id).question
+                p
+                    span(style="font-weight:bold")=question.id
+                    span ). 
+                    span(style="font-weight:bold")=question.question
+                each answer in question.answers
+                    input(type="radio" name=question.question id=answer)
+                    label(for=answer) #{answer}
+        p the button will disappear once you submit
+        p
+            button(id="submit" disabled="true") submit
+    script.
+
+        let DLDebug = (payload) => {
+            let li = document.createElement("li");
+            li.innerText = JSON.stringify(payload)
+            document.querySelector("#datalayer").appendChild(li)
+            document.querySelector("#datalayerlength").innerText = "(" + adobeDataLayer.length + ")"
+        }
+
+        document.querySelectorAll("input").forEach(el => {
+            el.addEventListener("click", () => {
+                if (document.querySelectorAll("input[type='radio']:checked").length == 4) {
+                    document.getElementById("submit").disabled = false
+                }
+                let payload = {
+                    "event": "FORM_SELECTION",
+                    "metadata": {
+                        "form": {}
+                    }
+                }
+                payload.metadata.form[el.name.split(" ").join("")] = el.id;
+                adobeDataLayer.push(payload)
+                DLDebug(payload)
+                document.querySelector("#datalayerstate").innerText = JSON.stringify(adobeDataLayer.getState().metadata.form, null, 4)
+                
+            })
+        })
+        document.getElementById("submit").addEventListener("click", () => {
+            let payload = {
+                    "event": "FORM_SUCCESS",
+                    "metadata": {
+                        "form":{}
+                    }
+                }
+                payload.metadata.form = adobeDataLayer.getState().metadata.form
+            adobeDataLayer.push(payload)
+            DLDebug(payload)
+            document.getElementById("submit").style.display = "none"
+        })
+    script. 
+        //- var v = Visitor.getInstance("5D60123F5245B13E0A490D45@AdobeOrg", {serverState: !{visitorState}});
+        //- console.log(v)
