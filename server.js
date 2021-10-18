@@ -13,7 +13,7 @@ const CONFIG = {
   client: process.env.client,
   organizationId: process.env.organizationId,
   timeout: 3000,
-  logger: console, // logs target responses to console
+  // logger: console, // logs target responses to console
 };
 const targetClient = TargetClient.create(CONFIG);
 
@@ -289,6 +289,114 @@ app.get('/addquestion', async (req, res) => {
     debug: false,
   });
 });
+
+app.get('/magictest', async (req, res) => {
+  let defaultQuestions = [
+    {
+      question: 'What is your favorite Color',
+      answers: ['red', 'green', 'blue', 'orange'],
+    },
+    {
+      question: 'FOC do you work for?',
+      answers: [
+        'rocket homes',
+        'rocket loans',
+        'rocket mortgage',
+        'rocket auto',
+      ],
+    },
+    {
+      question: 'What garage do you park in?',
+      answers: ['ZLOT', 'OCM', 'Greektown', 'I walk to work'],
+    },
+  ];
+  const visitorCookie =
+    req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
+  const targetCookie = req.cookies[TargetClient.TargetCookieName];
+  const targetLocationHintCookie =
+    req.cookies[TargetClient.TargetLocationHintCookieName];
+  const request = {
+    execute: {
+      mboxes: [
+        {
+          address: getAddress(req),
+          name: 'question1',
+          profileParameters: {
+            country: 'usa',
+          },
+        },
+        {
+          address: getAddress(req),
+          name: 'question2',
+          profileParameters: {
+            country: 'usa',
+          },
+        },
+        {
+          address: getAddress(req),
+          name: 'question3',
+          profileParameters: {
+            country: 'usa',
+          },
+        },
+      ],
+    },
+  };
+
+  const response = await targetClient.getOffers({
+    request,
+    visitorCookie,
+    targetCookie,
+    targetLocationHintCookie,
+  });
+
+  // console.log(response.response.execute.mboxes);
+  let { visitorState, responseTokens } = response;
+  let experienceName = responseTokens[0]['experience.name'];
+  let activityName = responseTokens[0]['activity.name'];
+  const mboxes = response.response.execute.mboxes;
+  let testQuestions = mboxes.filter(
+    (box) => box.options[0].content != undefined
+  );
+
+  if (testQuestions) {
+    testQuestions.forEach((question) => {
+      switch (question.name) {
+        case 'question1':
+          defaultQuestions[0] = question.options[0].content.questions[0];
+          break;
+
+        case 'question2':
+          defaultQuestions[1] = question.options[0].content.questions[0];
+          break;
+
+        case 'question3':
+          defaultQuestions[2] = question.options[0].content.questions[0];
+          break;
+      }
+    });
+  }
+
+  defaultQuestions.forEach((q, idx) => {
+    Object.assign(q, {
+      id: idx + 1,
+    });
+  });
+
+  // save the cookies to stay in the same experience!
+  res.set(getResponseHeaders());
+  saveCookie(res, response.targetCookie);
+  saveCookie(res, response.targetLocationHintCookie);
+
+  res.render('magictest', {
+    questions: defaultQuestions,
+    visitorState: JSON.stringify(visitorState),
+    experienceName: experienceName,
+    activityName: activityName,
+    debug: false,
+  });
+});
+
 app.listen(process.env.PORT, function () {
   console.log(
     'Listening on port ' + process.env.PORT.toString() + ' and watching!'
@@ -303,4 +411,4 @@ app.listen(process.env.PORT, function () {
 // -xt controls the addition show/ a/b to redirect
 // image
 // - by query param
-//
+// questions by box
