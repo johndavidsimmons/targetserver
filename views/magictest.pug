@@ -1,8 +1,11 @@
 extends layout.pug
 
 block content
-    h1 Magic test
-    p this page will add questions from Target with query parameter
+    h1 Multi question test test
+    p This page calls 3 individual mboxes, 1 per question and is auto allocated to find the best version
+    p
+        strong(style="font-weight:bold;color:red") Test questions: #{toColor}
+
     div(style="border:1px solid blue; width: 50%")
         each question in questions
             div(id=question.id).question

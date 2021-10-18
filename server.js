@@ -359,19 +359,23 @@ app.get('/magictest', async (req, res) => {
     (box) => box.options[0].content != undefined
   );
 
+  let toColor = [];
   if (testQuestions) {
     testQuestions.forEach((question) => {
       switch (question.name) {
         case 'question1':
           defaultQuestions[0] = question.options[0].content.questions[0];
+          toColor.push(question.name);
           break;
 
         case 'question2':
           defaultQuestions[1] = question.options[0].content.questions[0];
+          toColor.push(question.name);
           break;
 
         case 'question3':
           defaultQuestions[2] = question.options[0].content.questions[0];
+          toColor.push(question.name);
           break;
       }
     });
@@ -390,6 +394,7 @@ app.get('/magictest', async (req, res) => {
 
   res.render('magictest', {
     questions: defaultQuestions,
+    toColor: toColor,
     visitorState: JSON.stringify(visitorState),
     experienceName: experienceName,
     activityName: activityName,
