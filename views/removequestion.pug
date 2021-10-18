@@ -3,6 +3,13 @@ extends layout.pug
 block content
     h1 Remove question by query parameter
     p this page will eliminate questions based on a query parameter
+    ul 
+        li 
+            a(href="/removequestion?rm=none") keep all questions
+        li 
+            a(href="/removequestion?rm=agent") remove the agent question
+        li 
+            a(href="/removequestion?rm=fthb") remove the fthb question    
     div(style="border:1px solid blue; width: 50%")
         each question in questions
             div(id=question.id).question

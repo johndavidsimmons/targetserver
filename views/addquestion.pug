@@ -3,6 +3,13 @@ extends layout.pug
 block content
     h1 Add question by query parameter
     p this page will add questions from Target with query parameters
+    ul 
+        li 
+            a(href="/addquestion?add=none") 3 base  questions
+        li 
+            a(href="/addquestion?add=agent") add the agent question
+        li 
+            a(href="/addquestion?add=fthb") add the fthb question  
     div(style="border:1px solid blue; width: 50%")
         each question in questions
             div(id=question.id).question

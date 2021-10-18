@@ -1,82 +1,78 @@
-/***************************************************************************************
- * (c) 2019 Adobe. All rights reserved.
- * This file is licensed to you under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License. You may obtain a copy
- * of the License at http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under
- * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
- * OF ANY KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
- ****************************************************************************************/
-
-const fs = require("fs");
-const express = require("express");
-const cookieParser = require("cookie-parser");
-const TargetClient = require("@adobe/target-nodejs-sdk");
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const TargetClient = require('@adobe/target-nodejs-sdk');
 const pug = require('pug');
-const dotenv = require('dotenv')
+const dotenv = require('dotenv');
 const path = require('path');
 
 // load .env file
 dotenv.config();
 
 const CONFIG = {
+  propertyToken: process.env.propertyToken,
   client: process.env.client,
   organizationId: process.env.organizationId,
   timeout: 3000,
-  logger: console // logs target responses to console
+  logger: console, // logs target responses to console
 };
 const targetClient = TargetClient.create(CONFIG);
- 
- const app = express();
- app.use(cookieParser());
- app.use(express.static(path.join(__dirname, 'public')));
- app.set('views', __dirname + "/views")
- app.set("view engine", 'pug')
- 
- function saveCookie(res, cookie) {
-   if (!cookie) {
-     return;
-   }
- 
-   res.cookie(cookie.name, cookie.value, {maxAge: cookie.maxAge * 1000});
- }
- 
- const getResponseHeaders = () => ({
-   "Content-Type": "text/html",
-   "Expires": new Date().toUTCString()
- });
-  
- function getAddress(req) {
-   return { url: req.headers.host + req.originalUrl }
- }
-  
- app.get("/", async (req,res) => {
 
+const app = express();
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', __dirname + '/views');
+app.set('view engine', 'pug');
+
+function saveCookie(res, cookie) {
+  if (!cookie) {
+    return;
+  }
+
+  res.cookie(cookie.name, cookie.value, { maxAge: cookie.maxAge * 1000 });
+}
+
+const getResponseHeaders = () => ({
+  'Content-Type': 'text/html',
+  Expires: new Date().toUTCString(),
+});
+
+function getAddress(req) {
+  return { url: req.headers.host + req.originalUrl };
+}
+
+app.get('/', async (req, res) => {
   if (req.query.referrer) {
-    const visitorCookie = req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
+    const visitorCookie =
+      req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
     const targetCookie = req.cookies[TargetClient.TargetCookieName];
-    const targetLocationHintCookie = req.cookies[TargetClient.TargetLocationHintCookieName];
-  const request = {
-    execute: {
-      mboxes: [{
-        address: getAddress(req),
-        name: "landerImage",
-        profileParameters: {
-          country: 'usa'
-        }
-      }
-      ]
-    }}
+    const targetLocationHintCookie =
+      req.cookies[TargetClient.TargetLocationHintCookieName];
+    const request = {
+      execute: {
+        mboxes: [
+          {
+            address: getAddress(req),
+            name: 'landerImage',
+            profileParameters: {
+              country: 'usa',
+            },
+          },
+        ],
+      },
+    };
 
     try {
-      const response = await targetClient.getOffers({ request, visitorCookie, targetCookie, targetLocationHintCookie });
-      let {visitorState, responseTokens} = response
+      const response = await targetClient.getOffers({
+        request,
+        visitorCookie,
+        targetCookie,
+        targetLocationHintCookie,
+      });
+      let { visitorState, responseTokens } = response;
       let experienceName = responseTokens[0]['experience.name'];
       let activityName = responseTokens[0]['activity.name'];
-      let content = response.response.execute.mboxes[0].options[0].content
-      let src = content.slice(10,-3)
+      let content = response.response.execute.mboxes[0].options[0].content;
+      let src = content.slice(10, -3);
 
       // save the cookies to stay in the same experience!
       res.set(getResponseHeaders());
@@ -84,93 +80,92 @@ const targetClient = TargetClient.create(CONFIG);
       saveCookie(res, response.targetLocationHintCookie);
 
       res.render('index', {
-        title: "john",
+        title: 'john',
         response: JSON.stringify(response),
         visitorState: JSON.stringify(visitorState),
         content: content,
         experienceName: experienceName,
-        activityName:activityName,
-        src:src
-    })
+        activityName: activityName,
+        src: src,
+      });
     } catch (error) {
-      console.error("Target:", error);
-      
+      console.error('Target:', error);
     }
   } else {
     res.render('index', {
-      title: "john",
-      src: "rocketlogo.png"
-        // response: JSON.stringify(response),
-        // visitorState: JSON.stringify(visitorState),
-        // content: content,
-        // experienceName: experienceName,
-        // activityName:activityName,
-  })
+      title: 'john',
+      src: 'rocketlogo.png',
+    });
   }
+});
 
-
-  
- })
-
- app.get("/singlequestionreplacement", async (req,res) => {
-
+app.get('/singlequestionreplacement', async (req, res) => {
   const questions = [
     {
-      question: "What is your favorite Color",
-      answers: [
-        'red', 'green', 'blue', 'orange'
-      ]
+      question: 'What is your favorite Color',
+      answers: ['red', 'green', 'blue', 'orange'],
     },
     {
-      question: "FOC do you work for?",
+      question: 'FOC do you work for?',
       answers: [
-        'rocket homes', 'rocket loans', 'rocket mortgage', 'rocket auto'
-      ]
+        'rocket homes',
+        'rocket loans',
+        'rocket mortgage',
+        'rocket auto',
+      ],
     },
     {
-      question: "What garage do you park in?",
-      answers: [
-        'ZLOT', 'OCM', 'Greektown', 'I walk to work'
-      ]
-    }
+      question: 'What garage do you park in?',
+      answers: ['ZLOT', 'OCM', 'Greektown', 'I walk to work'],
+    },
   ];
 
-  const visitorCookie = req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
+  const visitorCookie =
+    req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
   const targetCookie = req.cookies[TargetClient.TargetCookieName];
-  const targetLocationHintCookie = req.cookies[TargetClient.TargetLocationHintCookieName];
+  const targetLocationHintCookie =
+    req.cookies[TargetClient.TargetLocationHintCookieName];
   const request = {
     execute: {
-      mboxes: [{
-        address: getAddress(req),
-        name: "singleQuestion",
-        profileParameters: {
-          country: "usa"
-        }
-      }
-      ]
-    }}
+      mboxes: [
+        {
+          address: getAddress(req),
+          name: 'singleQuestion',
+          profileParameters: {
+            country: 'usa',
+          },
+        },
+      ],
+    },
+  };
 
-    const response = await targetClient.getOffers({ request, visitorCookie, targetCookie, targetLocationHintCookie });
-    let {visitorState, responseTokens} = response
-    let experienceName = responseTokens[0]['experience.name'];
-    let activityName = responseTokens[0]['activity.name'];
+  const response = await targetClient.getOffers({
+    request,
+    visitorCookie,
+    targetCookie,
+    targetLocationHintCookie,
+  });
+  let { visitorState, responseTokens } = response;
+  let experienceName = responseTokens[0]['experience.name'];
+  let activityName = responseTokens[0]['activity.name'];
 
-    if (experienceName.toLowerCase().includes('variant')) {
-      questions.push(response.response.execute.mboxes.find(el => el.index == 0).options[0].content)
-    } else {
-      questions.push({
-        question: "IS DEFAULT CONTENT REALLY BORING???",
-        answers: [
-          'yes', 'probably', 'yep', 'nah'
-        ]
-      })
-    }
-    
+  if (experienceName.toLowerCase().includes('variant')) {
+    questions.push(
+      response.response.execute.mboxes.find((el) => el.index == 0).options[0]
+        .content
+    );
+  } else {
+    questions.push({
+      question: 'IS DEFAULT CONTENT REALLY BORING???',
+      answers: ['yes', 'probably', 'yep', 'nah'],
+    });
+  }
+
   // add an id to these
   questions.forEach((q, idx) => {
     Object.assign(q, {
-      id: idx
-    })
+      id: idx,
+    });
   });
 
   // save the cookies to stay in the same experience!
@@ -178,45 +173,53 @@ const targetClient = TargetClient.create(CONFIG);
   saveCookie(res, response.targetCookie);
   saveCookie(res, response.targetLocationHintCookie);
 
-   res.render("singlequestionreplacement", {
-     questions: questions,
-     responseOutput: JSON.stringify(response, null, 4),
-     visitorState: JSON.stringify(visitorState),
-     experienceName: experienceName,
-     activityName:activityName,
-     debug:false
-   })
- })
+  res.render('singlequestionreplacement', {
+    questions: questions,
+    responseOutput: JSON.stringify(response, null, 4),
+    visitorState: JSON.stringify(visitorState),
+    experienceName: experienceName,
+    activityName: activityName,
+    debug: false,
+  });
+});
 
- app.get("/removequestion", async(req,res) => {
-  const visitorCookie = req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
+app.get('/removequestion', async (req, res) => {
+  const visitorCookie =
+    req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
   const targetCookie = req.cookies[TargetClient.TargetCookieName];
-  const targetLocationHintCookie = req.cookies[TargetClient.TargetLocationHintCookieName];
+  const targetLocationHintCookie =
+    req.cookies[TargetClient.TargetLocationHintCookieName];
   const request = {
     execute: {
-      mboxes: [{
-        address: getAddress(req),
-        name: "removeQuestion",
-        profileParameters: {
-          country: "usa"
-        }
-      }
-      ]
-    }}
-    
+      mboxes: [
+        {
+          address: getAddress(req),
+          name: 'removeQuestion',
+          profileParameters: {
+            country: 'usa',
+          },
+        },
+      ],
+    },
+  };
 
-    const response = await targetClient.getOffers({ request, visitorCookie, targetCookie, targetLocationHintCookie });
-    let {visitorState, responseTokens} = response
-    let experienceName = responseTokens[0]['experience.name'];
-    let activityName = responseTokens[0]['activity.name'];
-    
+  const response = await targetClient.getOffers({
+    request,
+    visitorCookie,
+    targetCookie,
+    targetLocationHintCookie,
+  });
+  let { visitorState, responseTokens } = response;
+  let experienceName = responseTokens[0]['experience.name'];
+  let activityName = responseTokens[0]['activity.name'];
 
-    const questions = response.response.execute.mboxes[0].options[0].content.questions
+  const questions =
+    response.response.execute.mboxes[0].options[0].content.questions;
   // add an id to these
   questions.forEach((q, idx) => {
     Object.assign(q, {
-      id: idx+1
-    })
+      id: idx + 1,
+    });
   });
 
   // save the cookies to stay in the same experience!
@@ -224,45 +227,53 @@ const targetClient = TargetClient.create(CONFIG);
   saveCookie(res, response.targetCookie);
   saveCookie(res, response.targetLocationHintCookie);
 
-   res.render("removequestion", {
-     questions: response.response.execute.mboxes[0].options[0].content.questions,
-     visitorState: JSON.stringify(visitorState),
-     experienceName: experienceName,
-     activityName:activityName,
-     debug:false
-   })
- })
+  res.render('removequestion', {
+    questions: response.response.execute.mboxes[0].options[0].content.questions,
+    visitorState: JSON.stringify(visitorState),
+    experienceName: experienceName,
+    activityName: activityName,
+    debug: false,
+  });
+});
 
- app.get("/addquestion", async(req,res) => {
-  const visitorCookie = req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
+app.get('/addquestion', async (req, res) => {
+  const visitorCookie =
+    req.cookies[TargetClient.getVisitorCookieName(CONFIG.organizationId)];
   const targetCookie = req.cookies[TargetClient.TargetCookieName];
-  const targetLocationHintCookie = req.cookies[TargetClient.TargetLocationHintCookieName];
+  const targetLocationHintCookie =
+    req.cookies[TargetClient.TargetLocationHintCookieName];
   const request = {
     execute: {
-      mboxes: [{
-        address: getAddress(req),
-        name: "addQuestion",
-        profileParameters: {
-          country: "usa"
-        }
-      }
-      ]
-    }}
-    
+      mboxes: [
+        {
+          address: getAddress(req),
+          name: 'addQuestion',
+          profileParameters: {
+            country: 'usa',
+          },
+        },
+      ],
+    },
+  };
 
-    const response = await targetClient.getOffers({ request, visitorCookie, targetCookie, targetLocationHintCookie });
-    console.log(response)
-    let {visitorState, responseTokens} = response
-    let experienceName = responseTokens[0]['experience.name'];
-    let activityName = responseTokens[0]['activity.name'];
-    
+  const response = await targetClient.getOffers({
+    request,
+    visitorCookie,
+    targetCookie,
+    targetLocationHintCookie,
+  });
+  console.log(response);
+  let { visitorState, responseTokens } = response;
+  let experienceName = responseTokens[0]['experience.name'];
+  let activityName = responseTokens[0]['activity.name'];
 
-    const questions = response.response.execute.mboxes[0].options[0].content.questions
+  const questions =
+    response.response.execute.mboxes[0].options[0].content.questions;
   // add an id to these
   questions.forEach((q, idx) => {
     Object.assign(q, {
-      id: idx+1
-    })
+      id: idx + 1,
+    });
   });
 
   // save the cookies to stay in the same experience!
@@ -270,23 +281,26 @@ const targetClient = TargetClient.create(CONFIG);
   saveCookie(res, response.targetCookie);
   saveCookie(res, response.targetLocationHintCookie);
 
-   res.render("addquestion", {
-     questions: questions,
-     visitorState: JSON.stringify(visitorState),
-     experienceName: experienceName,
-     activityName:activityName,
-     debug:false
-   })
- })
- app.listen(process.env.PORT, function () {
-   console.log("Listening on port " + process.env.PORT.toString() + " and watching!");
- });
+  res.render('addquestion', {
+    questions: questions,
+    visitorState: JSON.stringify(visitorState),
+    experienceName: experienceName,
+    activityName: activityName,
+    debug: false,
+  });
+});
+app.listen(process.env.PORT, function () {
+  console.log(
+    'Listening on port ' + process.env.PORT.toString() + ' and watching!'
+  );
+});
 
-
- // change/swap question
-  // - pure ab?
- // remove question
-    // -xt controls the hide show/ a/b to redirect
- // add question
-    // -xt controls the addition show/ a/b to redirect
+// change/swap question
+// - pure ab?
+// remove question
+// -xt controls the hide show/ a/b to redirect
+// add question
+// -xt controls the addition show/ a/b to redirect
 // image
+// - by query param
+//
