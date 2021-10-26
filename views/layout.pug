@@ -4,12 +4,6 @@ html
         meta(charset="UTF-8")
         title ECID (Visitor API) with Analytics and at.js Integration Sample
         block scripts
-            script.
-                window.targetGlobalSettings = {  
-                    cookieDomain: "https://landertarget.herokuapp.com/",
-                    bodyHidingEnabled: true
-                };
-                (function(g,b,d,f){(function(a,c,d){if(a){var e=b.createElement("style");e.id=c;e.innerHTML=d;a.appendChild(e)}})(b.getElementsByTagName("head")[0],"at-body-style",d);setTimeout(function(){var a=b.getElementsByTagName("head")[0];if(a){var c=b.getElementById("at-body-style");c&&a.removeChild(c)}},f)})(window,document,"body {opacity: 0 !important}",3E3);
             script(
                 src="https://assets.adobedtm.com/b14636b10888/f35191b22ece/launch-c2fa6b57001f-development.min.js" 
                 async="true"
