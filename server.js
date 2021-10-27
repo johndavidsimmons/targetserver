@@ -262,7 +262,7 @@ app.get('/addquestion', async (req, res) => {
     targetCookie,
     targetLocationHintCookie,
   });
-  console.log(response);
+  // console.log(response);
   let { visitorState, responseTokens } = response;
   let experienceName = responseTokens[0]['experience.name'];
   let activityName = responseTokens[0]['activity.name'];

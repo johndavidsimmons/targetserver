@@ -34,7 +34,7 @@ block content
 
         document.querySelectorAll("input").forEach(el => {
             el.addEventListener("click", () => {
-                if (document.querySelectorAll("input[type='radio']:checked").length == 4) {
+                if (document.querySelectorAll("input[type='radio']:checked").length == document.querySelectorAll(".question").length) {
                     document.getElementById("submit").disabled = false
                 }
                 let payload = {
